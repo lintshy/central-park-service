@@ -94,6 +94,21 @@ if (app.Environment.IsDevelopment())
     app.MapScalarApiReference();
 }
 
+var startupLogger = app.Services.GetRequiredService<ILogger<Program>>();
+app.Lifetime.ApplicationStarted.Register(() =>
+{
+    StartupLog.ServiceStarted(startupLogger, app.Environment.EnvironmentName);
+    foreach (var url in app.Urls)
+    {
+        StartupLog.ListeningOn(startupLogger, url);
+        if (app.Environment.IsDevelopment())
+        {
+            StartupLog.ScalarUi(startupLogger, url);
+            StartupLog.OpenApiSpec(startupLogger, url);
+        }
+    }
+});
+
 app.UseCors();
 app.UseRateLimiter();
 app.UseAuthentication();
@@ -104,3 +119,18 @@ app.Run();
 
 // Expose Program for WebApplicationFactory in integration tests
 public partial class Program;
+
+internal static partial class StartupLog
+{
+    [LoggerMessage(Level = LogLevel.Information, Message = "Central Park Service started | Environment: {Environment}")]
+    internal static partial void ServiceStarted(Microsoft.Extensions.Logging.ILogger logger, string environment);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Listening on {Url}")]
+    internal static partial void ListeningOn(Microsoft.Extensions.Logging.ILogger logger, string url);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Scalar UI    -> {BaseUrl}/scalar/v1")]
+    internal static partial void ScalarUi(Microsoft.Extensions.Logging.ILogger logger, string baseUrl);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "OpenAPI spec -> {BaseUrl}/openapi/v1.json")]
+    internal static partial void OpenApiSpec(Microsoft.Extensions.Logging.ILogger logger, string baseUrl);
+}
