@@ -1,4 +1,5 @@
 using CentralPark.Shared;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CentralPark.Api.Extensions;
@@ -20,10 +21,19 @@ public static class ResultExtensions
             ? new CreatedAtRouteResult(routeName, routeValues, result.Value)
             : MapError(result.Error);
 
+    public static IActionResult ToAcceptedResult(this Result result) =>
+        result.IsSuccess
+            ? new AcceptedResult()
+            : MapError(result.Error);
+
     private static IActionResult MapError(Error error) =>
         error.Code.Contains("NotFound")
             ? new NotFoundObjectResult(error)
-            : error.Code.Contains("Unauthorized") || error.Code.Contains("InvalidCredentials")
-                ? new UnauthorizedObjectResult(error)
-                : new BadRequestObjectResult(error);
+            : error.Code.Contains("Forbidden")
+                ? new ObjectResult(error) { StatusCode = StatusCodes.Status403Forbidden }
+                : error.Code.Contains("Unauthorized") || error.Code.Contains("InvalidCredentials")
+                    ? new UnauthorizedObjectResult(error)
+                    : error.Code.Contains("AlreadyExists") || error.Code.Contains("InvalidTransition") || error.Code.Contains("NotAcceptingOrders")
+                        ? new ConflictObjectResult(error)
+                        : new BadRequestObjectResult(error);
 }

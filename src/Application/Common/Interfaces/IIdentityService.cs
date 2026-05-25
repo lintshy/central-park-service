@@ -11,4 +11,6 @@ public interface IIdentityService
     Task<IReadOnlyList<string>> GetRolesAsync(Guid userId, CancellationToken ct = default);
     Task SetRefreshTokenAsync(Guid userId, string token, DateTime expiry, CancellationToken ct = default);
     Task<bool> ValidateRefreshTokenAsync(Guid userId, string token, CancellationToken ct = default);
+    Task<Result<Guid>> FindUserIdByEmailAsync(string email, CancellationToken ct = default);
+    Task<Result<Guid>> RegisterExternalAsync(string email, CancellationToken ct = default);
 }

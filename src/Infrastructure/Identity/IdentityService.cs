@@ -73,4 +73,28 @@ public sealed class IdentityService(
         var user = await userManager.FindByIdAsync(userId.ToString());
         return user?.IsRefreshTokenValid(token) ?? false;
     }
+
+    public async Task<Result<Guid>> FindUserIdByEmailAsync(string email, CancellationToken ct = default)
+    {
+        var user = await userManager.FindByEmailAsync(email);
+        if (user is null)
+            return Result<Guid>.Failure(new Error("User.NotFound", $"No user found with email '{email}'."));
+        return Result<Guid>.Success(user.Id);
+    }
+
+    public async Task<Result<Guid>> RegisterExternalAsync(string email, CancellationToken ct = default)
+    {
+        var existing = await userManager.FindByEmailAsync(email);
+        if (existing is not null)
+            return Result<Guid>.Success(existing.Id);
+
+        var user = new ApplicationUser { UserName = email, Email = email };
+        var result = await userManager.CreateAsync(user);
+        if (!result.Succeeded)
+        {
+            var error = result.Errors.First();
+            return Result<Guid>.Failure(new Error($"Auth.{error.Code}", error.Description));
+        }
+        return Result<Guid>.Success(user.Id);
+    }
 }
