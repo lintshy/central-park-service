@@ -4,6 +4,9 @@ using CentralPark.Api.Extensions;
 using CentralPark.Api.Middleware;
 using CentralPark.Application.Extensions;
 using CentralPark.Infrastructure.Extensions;
+using CentralPark.Infrastructure.Persistence;
+using CentralPark.Infrastructure.Persistence.Seeders;
+using Microsoft.EntityFrameworkCore;
 using CentralPark.Shared.Constants;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.RateLimiting;
@@ -85,6 +88,19 @@ builder.Services.AddCors(opts =>
 });
 
 var app = builder.Build();
+
+// Apply pending migrations and seed dev data on startup
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    await db.Database.MigrateAsync();
+
+    if (app.Environment.IsDevelopment())
+    {
+        var seeder = scope.ServiceProvider.GetRequiredService<DevDataSeeder>();
+        await seeder.SeedAsync();
+    }
+}
 
 app.UseMiddleware<ExceptionMiddleware>();
 

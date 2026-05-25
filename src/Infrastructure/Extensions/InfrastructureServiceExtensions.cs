@@ -2,6 +2,7 @@ using CentralPark.Application.Common.Interfaces;
 using CentralPark.Infrastructure.FeatureFlags;
 using CentralPark.Infrastructure.Identity;
 using CentralPark.Infrastructure.Persistence;
+using CentralPark.Infrastructure.Persistence.Seeders;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -38,6 +39,7 @@ public static class InfrastructureServiceExtensions
         services.AddScoped<IIdentityService, IdentityService>();
         services.AddScoped<IFeatureFlagService, FeatureFlagService>();
         services.AddSingleton<IJwtService, JwtService>();
+        services.AddScoped<DevDataSeeder>();
 
         return services;
     }
