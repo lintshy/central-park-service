@@ -42,6 +42,7 @@ public static class InfrastructureServiceExtensions
         services.AddScoped<IUserProfileRepository, UserProfileRepository>();
         services.AddScoped<IStoreRepository, StoreRepository>();
         services.AddSingleton<IJwtService, JwtService>();
+        services.AddScoped<IGoogleAuthService, GoogleAuthService>();
         services.AddScoped<DevDataSeeder>();
 
         return services;

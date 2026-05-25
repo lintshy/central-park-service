@@ -63,6 +63,7 @@ nunit-*.xml
 *.rsuser
 
 # Secrets / env
+appsettings.Development.json
 appsettings.Production.json
 appsettings.Staging.json
 secrets.json
